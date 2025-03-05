@@ -10,8 +10,10 @@ export default function Header() {
       <header className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
+            <Link href="/">
             <Clock className="h-6 w-6 text-primary" />
             <span className="text-xl font-bold">CodeTimer</span>
+            </Link>
           </div>
           <div className="flex items-center gap-4">
             <Link href="/app" className="text-sm font-medium hover:underline">
