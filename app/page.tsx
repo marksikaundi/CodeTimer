@@ -1,39 +1,19 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { ArrowRight, Clock, BarChart2, Bell, Check } from "lucide-react"
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, Clock, BarChart2, Bell, Check } from "lucide-react";
 import Image from "next/image";
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen">
-      {/* Navigation */}
-      <header className="container mx-auto px-4 py-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Clock className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">CodeTimer</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/app" className="text-sm font-medium hover:underline">
-              App
-            </Link>
-            <Link href="#features" className="text-sm font-medium hover:underline">
-              Features
-            </Link>
-            <Button asChild size="sm">
-              <Link href="/app">Get Started</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
-
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">
         <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">
           Track Your Coding Time Effortlessly
         </h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-          Boost your productivity and maintain healthy coding habits with our intuitive time tracking tool.
+          Boost your productivity and maintain healthy coding habits with our
+          intuitive time tracking tool.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
           <Button asChild size="lg" className="gap-2">
@@ -62,7 +42,9 @@ export default function LandingPage() {
       {/* Features Section */}
       <section id="features" className="bg-muted/50 py-20">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Powerful Features</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">
+            Powerful Features
+          </h2>
           <div className="grid md:grid-cols-3 gap-8">
             <FeatureCard
               icon={<Clock className="h-10 w-10 text-primary" />}
@@ -86,7 +68,9 @@ export default function LandingPage() {
       {/* Testimonials */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">What Developers Say</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">
+            What Developers Say
+          </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             <TestimonialCard
               quote="CodeTimer has helped me maintain a healthy work-life balance. The hourly reminders are a game-changer."
@@ -110,9 +94,12 @@ export default function LandingPage() {
       {/* Pricing/Features */}
       <section className="bg-muted/50 py-20">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-6">Everything You Need, For Free</h2>
+          <h2 className="text-3xl font-bold mb-6">
+            Everything You Need, For Free
+          </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-12">
-            CodeTimer includes all features at no cost. No premium tiers, no subscriptions.
+            CodeTimer includes all features at no cost. No premium tiers, no
+            subscriptions.
           </p>
           <div className="bg-background rounded-lg border shadow-lg p-8 max-w-md mx-auto">
             <div className="flex justify-center mb-4">
@@ -140,9 +127,12 @@ export default function LandingPage() {
       <section className="py-20">
         <div className="container mx-auto px-4 text-center">
           <div className="bg-gradient-to-r from-primary to-blue-600 rounded-lg p-8 md:p-12">
-            <h2 className="text-3xl font-bold text-white mb-6">Ready to Boost Your Productivity?</h2>
+            <h2 className="text-3xl font-bold text-white mb-6">
+              Ready to Boost Your Productivity?
+            </h2>
             <p className="text-white/90 text-xl max-w-2xl mx-auto mb-8">
-              Join thousands of developers who use CodeTimer to track their coding sessions and improve their habits.
+              Join thousands of developers who use CodeTimer to track their
+              coding sessions and improve their habits.
             </p>
             <Button asChild size="lg" variant="secondary" className="gap-2">
               <Link href="/app">
@@ -162,16 +152,28 @@ export default function LandingPage() {
               <span className="text-lg font-bold">CodeTimer</span>
             </div>
             <div className="flex gap-8">
-              <Link href="/app" className="text-sm text-muted-foreground hover:text-foreground">
+              <Link
+                href="/app"
+                className="text-sm text-muted-foreground hover:text-foreground"
+              >
                 App
               </Link>
-              <Link href="#features" className="text-sm text-muted-foreground hover:text-foreground">
+              <Link
+                href="#features"
+                className="text-sm text-muted-foreground hover:text-foreground"
+              >
                 Features
               </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
+              <Link
+                href="#"
+                className="text-sm text-muted-foreground hover:text-foreground"
+              >
                 Privacy
               </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
+              <Link
+                href="#"
+                className="text-sm text-muted-foreground hover:text-foreground"
+              >
                 Terms
               </Link>
             </div>
@@ -182,7 +184,7 @@ export default function LandingPage() {
         </div>
       </footer>
     </div>
-  )
+  );
 }
 
 interface FeatureCardProps {
@@ -198,7 +200,7 @@ function FeatureCard({ icon, title, description }: FeatureCardProps) {
       <h3 className="text-xl font-semibold mb-2">{title}</h3>
       <p className="text-muted-foreground">{description}</p>
     </div>
-  )
+  );
 }
 
 interface TestimonialCardProps {
@@ -233,7 +235,7 @@ function TestimonialCard({ quote, author, role }: TestimonialCardProps) {
         <p className="text-sm text-muted-foreground">{role}</p>
       </div>
     </div>
-  )
+  );
 }
 
 function FeatureItem({ children }: { children: React.ReactNode }) {
@@ -242,6 +244,5 @@ function FeatureItem({ children }: { children: React.ReactNode }) {
       <Check className="h-5 w-5 text-primary shrink-0 mt-0.5" />
       <span>{children}</span>
     </li>
-  )
+  );
 }
-
