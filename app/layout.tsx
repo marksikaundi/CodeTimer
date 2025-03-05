@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Time Tracker",
-  description: "Track your coding activity and improve your productivity",
+  title: "CodeTimer",
+  description: "CodeTimer is a simple code timer for developers.",
 };
 
 export default function RootLayout({
