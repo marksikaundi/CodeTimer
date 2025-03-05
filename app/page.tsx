@@ -90,8 +90,8 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             <TestimonialCard
               quote="CodeTimer has helped me maintain a healthy work-life balance. The hourly reminders are a game-changer."
-              author="Alex Chen"
-              role="Frontend Developer"
+              author="Mark Sikaundi"
+              role="Quality Assurance Engineer"
             />
             <TestimonialCard
               quote="I love seeing my coding stats improve over time. It's motivating to see my streak grow day by day."
