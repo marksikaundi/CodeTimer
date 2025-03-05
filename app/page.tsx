@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Clock, BarChart2, Bell, Check } from "lucide-react"
+import Image from "next/image";
 
 export default function LandingPage() {
   return (
@@ -47,9 +48,11 @@ export default function LandingPage() {
         <div className="relative">
           <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-blue-600 rounded-lg blur opacity-30"></div>
           <div className="relative bg-background rounded-lg border shadow-lg overflow-hidden">
-            <img
-              src="/placeholder.svg?height=600&width=1200"
+            <Image
+              src="/timer.png"
               alt="CodeTimer application screenshot"
+              width={1200}
+              height={600}
               className="w-full h-auto"
             />
           </div>
