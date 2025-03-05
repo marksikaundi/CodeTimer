@@ -1,6 +1,6 @@
-import React from 'react'
-import { Clock } from 'lucide-react'
-import Link from 'next/link'
+import React from "react";
+import { Clock } from "lucide-react";
+import Link from "next/link";
 
 export default function Footer() {
   return (
@@ -9,10 +9,18 @@ export default function Footer() {
       <footer className="bg-muted/30 py-12">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center gap-2 mb-4 md:mb-0">
+            {/* <div className="flex items-center gap-2 mb-4 md:mb-0">
               <Link href="/">
               <Clock className="h-5 w-5 text-primary" />
               <span className="text-lg font-bold">CodeTimer</span>
+              </Link>
+            </div> */}
+            <div className="flex items-center gap-2 mb-4 md:mb-0">
+              <Link href="/">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-primary" />
+                  <span className="text-lg font-bold">CodeTimer</span>
+                </div>
               </Link>
             </div>
             <div className="flex gap-8">
@@ -48,5 +56,5 @@ export default function Footer() {
         </div>
       </footer>
     </div>
-  )
+  );
 }
