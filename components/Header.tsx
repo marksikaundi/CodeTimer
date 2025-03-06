@@ -57,11 +57,11 @@ export default function Header() {
             <Link href="/app" className="text-sm font-medium hover:underline">
               App
             </Link>
-            <Link href="#features" className="text-sm font-medium hover:underline">
+            <Link href="/features" className="text-sm font-medium hover:underline">
               Features
             </Link>
             <Button asChild size="sm">
-              <Link href="/app">Get Started</Link>
+              <Link href="/tasks">Manage Tasks</Link>
             </Button>
             <Button variant="ghost" size="icon" onClick={toggleDarkMode} aria-label="Toggle dark mode" className="ml-2">
               {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
