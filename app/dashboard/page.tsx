@@ -1,12 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   Clock,
   Calendar,
   Flame,
   CheckSquare,
+  ArrowLeft,
   ChevronRight,
+  ListTodo,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,15 +20,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatTime } from "@/lib/utils";
+import { formatTime, formatDate } from "@/lib/utils";
+
+interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  completed: boolean;
+  date: string;
+}
 
 export default function DashboardPage() {
   const [sessions, setSessions] = useState<
     { date: string; duration: number }[]
   >([]);
-  const [tasks, setTasks] = useState<
-    { id: string; title: string; completed: boolean; date: string }[]
-  >([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Load saved data from localStorage
@@ -40,7 +49,7 @@ export default function DashboardPage() {
       localStorage.setItem("codingSessions", JSON.stringify(demoSessions));
     }
 
-    // Load or generate demo tasks
+    // Load tasks
     const savedTasks = localStorage.getItem("codingTasks");
     if (savedTasks) {
       setTasks(JSON.parse(savedTasks));
@@ -72,6 +81,28 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen">
+      {/* Navigation */}
+      <header className="container mx-auto px-4 py-6">
+        <div className="flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <Clock className="h-6 w-6 text-primary" />
+            <span className="text-xl font-bold">CodeTimer</span>
+          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/app"
+              className="text-sm font-medium hover:underline flex items-center gap-1"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Timer
+            </Link>
+            <Button asChild size="sm">
+              <Link href="/app">Start Tracking</Link>
+            </Button>
+          </div>
+        </div>
+      </header>
+
       {/* Dashboard Header */}
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
@@ -81,7 +112,17 @@ export default function DashboardPage() {
               Track your coding habits and productivity
             </p>
           </div>
-          <div className="mt-4 md:mt-0">
+          <div className="mt-4 md:mt-0 flex items-center gap-2">
+            <Link href="/tasks">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <ListTodo className="h-4 w-4" />
+                Manage Tasks
+              </Button>
+            </Link>
             <Tabs defaultValue="week" className="w-[300px]">
               <TabsList>
                 <TabsTrigger value="week">Week</TabsTrigger>
@@ -195,9 +236,14 @@ export default function DashboardPage() {
 
           {/* Tasks */}
           <Card>
-            <CardHeader>
-              <CardTitle>Coding Tasks</CardTitle>
-              <CardDescription>Your recent tasks</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Coding Tasks</CardTitle>
+                <CardDescription>Your recent tasks</CardDescription>
+              </div>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/tasks">View All</Link>
+              </Button>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -224,14 +270,25 @@ export default function DashboardPage() {
                       >
                         {task.title}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      {task.description && (
+                        <p
+                          className={`text-sm mt-1 ${
+                            task.completed
+                              ? "line-through text-muted-foreground"
+                              : "text-muted-foreground"
+                          }`}
+                        >
+                          {task.description}
+                        </p>
+                      )}
+                      <p className="text-xs text-muted-foreground mt-1">
                         {formatDate(task.date)}
                       </p>
                     </div>
                   </div>
                 ))}
-                <Button variant="outline" className="w-full" size="sm">
-                  View All Tasks
+                <Button asChild variant="outline" className="w-full" size="sm">
+                  <Link href="/tasks">Manage Tasks</Link>
                 </Button>
               </div>
             </CardContent>
@@ -256,19 +313,15 @@ export default function DashboardPage() {
 }
 
 // Helper Components
-function MetricCard({
-  icon,
-  title,
-  value,
-  trend,
-  trendUp,
-}: {
+interface MetricCardProps {
   icon: React.ReactNode;
   title: string;
   value: string;
   trend: string;
   trendUp: boolean;
-}) {
+}
+
+function MetricCard({ icon, title, value, trend, trendUp }: MetricCardProps) {
   return (
     <Card>
       <CardContent className="p-6">
@@ -329,11 +382,12 @@ function ActivityHeatmap({ data }: { data: number[][] }) {
   );
 }
 
-function TimeDistributionChart({
-  data,
-}: {
-  data: { label: string; value: number }[];
-}) {
+interface TimeDistributionData {
+  label: string;
+  value: number;
+}
+
+function TimeDistributionChart({ data }: { data: TimeDistributionData[] }) {
   const maxValue = Math.max(...data.map((item) => item.value));
 
   return (
@@ -356,11 +410,12 @@ function TimeDistributionChart({
   );
 }
 
-function WeeklyChart({
-  sessions,
-}: {
-  sessions: { date: string; duration: number }[];
-}) {
+interface Session {
+  date: string;
+  duration: number;
+}
+
+function WeeklyChart({ sessions }: { sessions: Session[] }) {
   // Get the last 7 days
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const date = new Date();
@@ -417,15 +472,6 @@ function WeeklyChart({
 }
 
 // Helper Functions
-function formatDate(dateString: string) {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
 function formatDayName(dateString: string) {
   const date = new Date(dateString);
   return date.toLocaleDateString("en-US", { weekday: "short" });
@@ -433,7 +479,7 @@ function formatDayName(dateString: string) {
 
 function calculateMetrics(
   sessions: { date: string; duration: number }[],
-  tasks: { id: string; title: string; completed: boolean; date: string }[]
+  tasks: Task[]
 ) {
   // Calculate total time
   const totalTime = sessions.reduce(
@@ -453,8 +499,8 @@ function calculateMetrics(
   if (sortedDates.length > 0) {
     currentStreak = 1;
     for (let i = 0; i < sortedDates.length - 1; i++) {
-      const current = new Date(sortedDates[i]);
-      const prev = new Date(sortedDates[i + 1]);
+      const current = new Date(sortedDates[i] as string);
+      const prev = new Date(sortedDates[i + 1] as string);
 
       // Check if dates are consecutive
       const diffTime = current.getTime() - prev.getTime();
@@ -469,7 +515,7 @@ function calculateMetrics(
   }
 
   // Calculate tasks completed
-  const tasksCompleted = tasks.filter((t) => t.completed).length;
+  const tasksCompleted = tasks.filter((t: Task) => t.completed).length;
 
   return {
     totalTime,
@@ -487,7 +533,7 @@ function generateHeatmapData(sessions: { date: string; duration: number }[]) {
     .map(() => Array(7).fill(0));
 
   // Fill with session data
-  sessions.forEach((session) => {
+  sessions.forEach((session: { date: string; duration: number }) => {
     const date = new Date(session.date);
     const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
 
@@ -521,7 +567,7 @@ function calculateTimeDistribution(
   ];
 
   // Calculate hours in each block
-  sessions.forEach((session) => {
+  sessions.forEach((session: { date: string; duration: number }) => {
     // For demo purposes, distribute hours somewhat randomly
     const hours = session.duration / 3600;
 
