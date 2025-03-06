@@ -31,13 +31,13 @@ export default function Footer() {
                 Features
               </Link>
               <Link
-                href="#"
+                href="/legal/privacy"
                 className="text-sm text-muted-foreground hover:text-foreground"
               >
                 Privacy
               </Link>
               <Link
-                href="#"
+                href="/legal/terms"
                 className="text-sm text-muted-foreground hover:text-foreground"
               >
                 Terms
