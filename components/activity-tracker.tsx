@@ -6,12 +6,14 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
-import { Play, Pause, RotateCcw, Volume2, VolumeX, Moon, Sun } from "lucide-react"
+import { Play, Pause, RotateCcw, Volume2, VolumeX } from "lucide-react"
 import { ActivityStats } from "@/components/activity-stats"
 import { formatTime } from "@/lib/utils"
 import { Progress } from "@/components/ui/progress"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import Link from "next/link"
+import { BarChart2 } from "lucide-react"
 
 export default function ActivityTracker() {
   const [isActive, setIsActive] = useState(false)
@@ -108,18 +110,6 @@ export default function ActivityTracker() {
     }
   }, [isActive, soundEnabled, targetTime])
 
-  // Toggle dark mode
-  const toggleDarkMode = () => {
-    setIsDarkMode((prev) => {
-      const newValue = !prev
-      if (newValue) {
-        document.documentElement.classList.add("dark")
-      } else {
-        document.documentElement.classList.remove("dark")
-      }
-      return newValue
-    })
-  }
 
   const startTimer = () => {
     setIsActive(true)
@@ -236,9 +226,10 @@ export default function ActivityTracker() {
     <div className={`max-w-4xl mx-auto`}>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Code Time Tracker</h1>
-        <Button variant="ghost" size="icon" onClick={toggleDarkMode}>
-          {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-        </Button>
+        <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
+          <BarChart2 className="h-4 w-4" />
+          Dashboard
+        </Link>
       </div>
 
       <Tabs defaultValue="timer" className="w-full">
