@@ -25,7 +25,7 @@ export default function Footer() {
                 App
               </Link>
               <Link
-                href="/about-us"
+                href="/legal/about-us"
                 className="text-sm text-muted-foreground hover:text-foreground"
               >
                 About us
