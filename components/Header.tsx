@@ -57,8 +57,8 @@ export default function Header() {
             <Link href="/app" className="text-sm font-medium hover:underline">
               App
             </Link>
-            <Link href="/features" className="text-sm font-medium hover:underline">
-              Features
+            <Link href="/view-badges" className="text-sm font-medium hover:underline">
+            Badges
             </Link>
             <Button asChild size="sm">
               <Link href="/tasks">Manage Tasks</Link>
