@@ -115,6 +115,7 @@ export default function LandingPage() {
               <FeatureItem>Dark mode support</FeatureItem>
               <FeatureItem>Progress tracking</FeatureItem>
               <FeatureItem>Custom time presets</FeatureItem>
+              <FeatureItem>View Badge collections</FeatureItem>
             </ul>
             <Button asChild size="lg" className="w-full">
               <Link href="/app">Get Started Now</Link>

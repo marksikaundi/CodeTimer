@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Plus, CheckSquare, Square, Trash2, Filter } from "lucide-react"
+import { Plus, CheckSquare, Square, Trash2, Filter, Award } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { formatDate } from "@/lib/utils"
+import { Badge } from "@/components/ui/badge"
 
 interface Task {
   id: string
@@ -27,6 +28,7 @@ export default function TasksPage() {
   const [newTaskDescription, setNewTaskDescription] = useState("")
   const [filter, setFilter] = useState<"all" | "active" | "completed">("all")
   const [isLoading, setIsLoading] = useState(true)
+  const [showBadgeNotification, setShowBadgeNotification] = useState(false)
 
   // Load tasks from localStorage
   useEffect(() => {
@@ -41,6 +43,16 @@ export default function TasksPage() {
   useEffect(() => {
     if (!isLoading) {
       localStorage.setItem("codingTasks", JSON.stringify(tasks))
+
+      // Check if a task was just completed
+      const completedTasksCount = tasks.filter((task) => task.completed).length
+      const savedBadges = localStorage.getItem("codingBadges")
+      const badges = savedBadges ? JSON.parse(savedBadges) : []
+
+      // Show badge notification if user has completed tasks but hasn't seen the badges page
+      if (completedTasksCount > 0 && badges.length === 0) {
+        setShowBadgeNotification(true)
+      }
     }
   }, [tasks, isLoading])
 
@@ -83,6 +95,7 @@ export default function TasksPage() {
   const activeTasks = tasks.filter((task) => !task.completed).length
   const completedTasks = tasks.filter((task) => task.completed).length
 
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -100,6 +113,17 @@ export default function TasksPage() {
             <p className="text-muted-foreground">Track what you&apos;re working on</p>
           </div>
           <div className="mt-4 md:mt-0 flex items-center gap-2">
+            <Link href="/view-badges">
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <Award className="h-4 w-4" />
+                View Badges
+                {showBadgeNotification && (
+                  <Badge variant="default" className="ml-1 bg-yellow-500">
+                    New
+                  </Badge>
+                )}
+              </Button>
+            </Link>
             <Link href="/dashboard">
               <Button variant="outline" size="sm">
                 Dashboard
