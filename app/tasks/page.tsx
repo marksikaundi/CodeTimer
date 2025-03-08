@@ -1,65 +1,76 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { Plus, CheckSquare, Square, Trash2, Filter, Award } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { formatDate } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { Plus, CheckSquare, Square, Trash2, Filter } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { formatDate } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 interface Task {
-  id: string
-  title: string
-  description?: string
-  completed: boolean
-  date: string
+  id: string;
+  title: string;
+  description?: string;
+  completed: boolean;
+  date: string;
 }
 
 export default function TasksPage() {
-  const [tasks, setTasks] = useState<Task[]>([])
-  const [newTaskTitle, setNewTaskTitle] = useState("")
-  const [newTaskDescription, setNewTaskDescription] = useState("")
-  const [filter, setFilter] = useState<"all" | "active" | "completed">("all")
-  const [isLoading, setIsLoading] = useState(true)
-  const [showBadgeNotification, setShowBadgeNotification] = useState(false)
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [newTaskDescription, setNewTaskDescription] = useState("");
+  const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
+  const [isLoading, setIsLoading] = useState(true);
+  const [showBadgeNotification, setShowBadgeNotification] = useState(false);
 
   // Load tasks from localStorage
   useEffect(() => {
-    const savedTasks = localStorage.getItem("codingTasks")
+    const savedTasks = localStorage.getItem("codingTasks");
     if (savedTasks) {
-      setTasks(JSON.parse(savedTasks))
+      setTasks(JSON.parse(savedTasks));
     }
-    setIsLoading(false)
-  }, [])
+    setIsLoading(false);
+  }, []);
 
   // Save tasks to localStorage when they change
   useEffect(() => {
     if (!isLoading) {
-      localStorage.setItem("codingTasks", JSON.stringify(tasks))
+      localStorage.setItem("codingTasks", JSON.stringify(tasks));
 
       // Check if a task was just completed
-      const completedTasksCount = tasks.filter((task) => task.completed).length
-      const savedBadges = localStorage.getItem("codingBadges")
-      const badges = savedBadges ? JSON.parse(savedBadges) : []
+      const completedTasksCount = tasks.filter((task) => task.completed).length;
+      const savedBadges = localStorage.getItem("codingBadges");
+      const badges = savedBadges ? JSON.parse(savedBadges) : [];
 
       // Show badge notification if user has completed tasks but hasn't seen the badges page
       if (completedTasksCount > 0 && badges.length === 0) {
-        setShowBadgeNotification(true)
+        setShowBadgeNotification(true);
       }
     }
-  }, [tasks, isLoading])
+  }, [tasks, isLoading]);
 
   // Add a new task
   const addTask = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (newTaskTitle.trim() === "") return
+    e.preventDefault();
+    if (newTaskTitle.trim() === "") return;
 
     const newTask: Task = {
       id: Date.now().toString(),
@@ -67,41 +78,44 @@ export default function TasksPage() {
       description: newTaskDescription.trim() || undefined,
       completed: false,
       date: new Date().toISOString().split("T")[0],
-    }
+    };
 
-    setTasks([newTask, ...tasks])
-    setNewTaskTitle("")
-    setNewTaskDescription("")
-  }
+    setTasks([newTask, ...tasks]);
+    setNewTaskTitle("");
+    setNewTaskDescription("");
+  };
 
   // Toggle task completion status
   const toggleTaskStatus = (id: string) => {
-    setTasks(tasks.map((task) => (task.id === id ? { ...task, completed: !task.completed } : task)))
-  }
+    setTasks(
+      tasks.map((task) =>
+        task.id === id ? { ...task, completed: !task.completed } : task
+      )
+    );
+  };
 
   // Delete a task
   const deleteTask = (id: string) => {
-    setTasks(tasks.filter((task) => task.id !== id))
-  }
+    setTasks(tasks.filter((task) => task.id !== id));
+  };
 
   // Filter tasks based on current filter
   const filteredTasks = tasks.filter((task) => {
-    if (filter === "active") return !task.completed
-    if (filter === "completed") return task.completed
-    return true
-  })
+    if (filter === "active") return !task.completed;
+    if (filter === "completed") return task.completed;
+    return true;
+  });
 
   // Count tasks by status
-  const activeTasks = tasks.filter((task) => !task.completed).length
-  const completedTasks = tasks.filter((task) => task.completed).length
-
+  const activeTasks = tasks.filter((task) => !task.completed).length;
+  const completedTasks = tasks.filter((task) => task.completed).length;
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-pulse text-xl">Loading tasks...</div>
       </div>
-    )
+    );
   }
 
   return (
@@ -110,12 +124,17 @@ export default function TasksPage() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold">Coding Tasks</h1>
-            <p className="text-muted-foreground">Track what you&apos;re working on</p>
+            <p className="text-muted-foreground">
+              Track what you&apos;re working on
+            </p>
           </div>
           <div className="mt-4 md:mt-0 flex items-center gap-2">
             <Link href="/view-badges">
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
-                <Award className="h-4 w-4" />
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
                 View Badges
                 {showBadgeNotification && (
                   <Badge variant="default" className="ml-1 bg-yellow-500">
@@ -228,55 +247,88 @@ export default function TasksPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setFilter("all")}>All Tasks</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setFilter("active")}>Active Tasks</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setFilter("completed")}>Completed Tasks</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilter("all")}>
+                  All Tasks
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilter("active")}>
+                  Active Tasks
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilter("completed")}>
+                  Completed Tasks
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="all" className="w-full" onValueChange={(value) => setFilter(value as "all" | "active" | "completed")}>
+            <Tabs
+              defaultValue="all"
+              className="w-full"
+              onValueChange={(value) =>
+                setFilter(value as "all" | "active" | "completed")
+              }
+            >
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="all">All</TabsTrigger>
                 <TabsTrigger value="active">Active</TabsTrigger>
                 <TabsTrigger value="completed">Completed</TabsTrigger>
               </TabsList>
               <TabsContent value="all" className="mt-4">
-                <TaskList tasks={filteredTasks} onToggle={toggleTaskStatus} onDelete={deleteTask} />
+                <TaskList
+                  tasks={filteredTasks}
+                  onToggle={toggleTaskStatus}
+                  onDelete={deleteTask}
+                />
               </TabsContent>
               <TabsContent value="active" className="mt-4">
-                <TaskList tasks={filteredTasks} onToggle={toggleTaskStatus} onDelete={deleteTask} />
+                <TaskList
+                  tasks={filteredTasks}
+                  onToggle={toggleTaskStatus}
+                  onDelete={deleteTask}
+                />
               </TabsContent>
               <TabsContent value="completed" className="mt-4">
-                <TaskList tasks={filteredTasks} onToggle={toggleTaskStatus} onDelete={deleteTask} />
+                <TaskList
+                  tasks={filteredTasks}
+                  onToggle={toggleTaskStatus}
+                  onDelete={deleteTask}
+                />
               </TabsContent>
             </Tabs>
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }
 
 interface TaskListProps {
-  tasks: Task[]
-  onToggle: (id: string) => void
-  onDelete: (id: string) => void
+  tasks: Task[];
+  onToggle: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
 function TaskList({ tasks, onToggle, onDelete }: TaskListProps) {
   if (tasks.length === 0) {
-    return <div className="text-center py-8 text-muted-foreground">No tasks found. Add a new task to get started!</div>
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        No tasks found. Add a new task to get started!
+      </div>
+    );
   }
 
   return (
     <div className="space-y-4">
       {tasks.map((task) => (
-        <div key={task.id} className="flex items-start gap-3 p-4 bg-muted/30 rounded-lg">
+        <div
+          key={task.id}
+          className="flex items-start gap-3 p-4 bg-muted/30 rounded-lg"
+        >
           <button
             onClick={() => onToggle(task.id)}
             className="mt-0.5 flex-shrink-0"
-            aria-label={task.completed ? "Mark as incomplete" : "Mark as complete"}
+            aria-label={
+              task.completed ? "Mark as incomplete" : "Mark as complete"
+            }
           >
             {task.completed ? (
               <CheckSquare className="h-5 w-5 text-primary" />
@@ -285,17 +337,27 @@ function TaskList({ tasks, onToggle, onDelete }: TaskListProps) {
             )}
           </button>
           <div className="flex-1 min-w-0">
-            <h3 className={`font-medium ${task.completed ? "line-through text-muted-foreground" : ""}`}>
+            <h3
+              className={`font-medium ${
+                task.completed ? "line-through text-muted-foreground" : ""
+              }`}
+            >
               {task.title}
             </h3>
             {task.description && (
               <p
-                className={`text-sm mt-1 ${task.completed ? "line-through text-muted-foreground" : "text-muted-foreground"}`}
+                className={`text-sm mt-1 ${
+                  task.completed
+                    ? "line-through text-muted-foreground"
+                    : "text-muted-foreground"
+                }`}
               >
                 {task.description}
               </p>
             )}
-            <p className="text-xs text-muted-foreground mt-2">Added on {formatDate(task.date)}</p>
+            <p className="text-xs text-muted-foreground mt-2">
+              Added on {formatDate(task.date)}
+            </p>
           </div>
           <button
             onClick={() => onDelete(task.id)}
@@ -307,6 +369,5 @@ function TaskList({ tasks, onToggle, onDelete }: TaskListProps) {
         </div>
       ))}
     </div>
-  )
+  );
 }
-

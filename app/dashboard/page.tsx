@@ -9,7 +9,6 @@ import {
   CheckSquare,
   ArrowLeft,
   ChevronRight,
-  ListTodo,
   User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -85,31 +84,21 @@ export default function DashboardPage() {
       {/* Navigation */}
       <header className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
-          {/* <Link href="/" className="flex items-center gap-2">
-            <Clock className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">CodeTimer</span>
-          </Link> */}
           <Link href="/app" className="flex items-center gap-2">
             <ArrowLeft className="h-4 w-4" />
             Back to Timer
           </Link>
 
           <div className="flex items-center gap-4">
-            {/* <Link
-              href="/app"
-              className="text-sm font-medium hover:underline flex items-center gap-1"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Timer
-            </Link> */}
             <Button
               className="bg-white text-black hover:bg-white hover:text-black"
               asChild
               size="sm"
             >
               <Link href="/view-badge">
-              <User className="h-4 w-4" />
-              View Badge</Link>
+                <User className="h-4 w-4" />
+                View Badge
+              </Link>
             </Button>
           </div>
         </div>
@@ -131,7 +120,6 @@ export default function DashboardPage() {
                 size="sm"
                 className="flex items-center gap-2"
               >
-                <ListTodo className="h-4 w-4" />
                 Manage Tasks
               </Button>
             </Link>
