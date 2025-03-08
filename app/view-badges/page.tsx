@@ -83,7 +83,7 @@ export default function BadgesPage() {
         })
       }
     }
-  }, [tasks, sessions, isLoading])
+  }, [tasks, sessions, isLoading, badges])
 
   // Filter badges based on active tab
   const filteredBadges = badges.filter((badge) => {
