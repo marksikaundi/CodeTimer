@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Clock, Moon, Sun, Menu } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 
 export default function Header() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -75,9 +76,39 @@ export default function Header() {
             Badges
           </Link>
 
-          <Button asChild size="sm">
+          {/* <Button asChild size="sm">
             <Link href="/tasks">Manage Tasks</Link>
-          </Button>
+          </Button> */}
+          <div className=" flex items-center gap-4 ">
+            <SignedIn>
+              <Link className="mr-4" href="/tasks">
+                Manage Tasks
+              </Link>
+              <Link href="/dashboard">
+                <Button
+                  variant="outline"
+                  className="mr-4 bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text "
+                >
+                  Dashboard
+                </Button>
+              </Link>
+
+              <div className="p-2 w-10 h-10 flex items-center justify-center rounded-full border bg-blue-100 border-blue-200 ">
+                <UserButton />
+              </div>
+            </SignedIn>
+
+            <SignedOut>
+              <SignInButton mode="modal">
+                <Button
+                  variant="ghost"
+                  className="cursor-pointer bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text "
+                >
+                  Sign In
+                </Button>
+              </SignInButton>
+            </SignedOut>
+          </div>
           <Button
             variant="ghost"
             size="icon"
