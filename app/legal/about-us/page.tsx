@@ -34,7 +34,7 @@ export default function AboutPage() {
                 </Link>
               </Button>
               <Button variant="outline" size="lg">
-                <Link href="#our-story">Our Story</Link>
+                <Link href="/https://ko-fi.com/lupleg">Support us</Link>
               </Button>
             </div>
           </motion.div>
@@ -185,11 +185,11 @@ export default function AboutPage() {
               name="Mark Sikaundi"
               role="Founder & Software Engineer"
               bio="Full-stack developer with a passion for developer tools and productivity systems."
-              imageSrc="/placeholder.svg?height=400&width=400"
+              imageSrc="/mark.jpg"
               socialLinks={{
-                twitter: "#",
-                github: "#",
-                linkedin: "#",
+                twitter: "https://x.com/Alisikaundi",
+                github: "https://github.com/marksikaundi",
+                linkedin: "https://linkedin.com/in/marksikaundi",
               }}
             />
             {/* <TeamMember
