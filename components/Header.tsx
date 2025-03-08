@@ -75,10 +75,7 @@ export default function Header() {
           >
             Badges
           </Link>
-
-          {/* <Button asChild size="sm">
-            <Link href="/tasks">Manage Tasks</Link>
-          </Button> */}
+          
           <div className=" flex items-center gap-4 ">
             <SignedIn>
               <Link className="mr-4" href="/tasks">
