@@ -33,6 +33,7 @@ export default function ActivityTracker() {
   const lastUpdateTimeRef = useRef<number>(0)
   const accumulatedTimeRef = useRef<number>(0)
   const isTabActiveRef = useRef<boolean>(true)
+  const pausedTimeRef = useRef<number>(0)
 
   // Set isClient to true once the component is mounted
   useEffect(() => {
@@ -52,7 +53,12 @@ export default function ActivityTracker() {
     // Check if there's a saved timer state
     const savedTimerState = localStorage.getItem("timerState")
 
-    if (savedTime) setTime(Number.parseInt(savedTime))
+    if (savedTime) {
+      const parsedTime = Number.parseInt(savedTime)
+      setTime(parsedTime)
+      pausedTimeRef.current = parsedTime
+    }
+
     if (savedSessions) setSessions(JSON.parse(savedSessions))
     if (savedSoundEnabled) setSoundEnabled(savedSoundEnabled === "true")
     if (savedTargetTime && savedTargetTime !== "null") setTargetTime(Number.parseInt(savedTargetTime))
@@ -67,21 +73,24 @@ export default function ActivityTracker() {
     // Restore timer state if it was running when the page was closed
     if (savedTimerState) {
       const timerState = JSON.parse(savedTimerState)
+
+      // Set the accumulated time from saved state
+      accumulatedTimeRef.current = timerState.accumulatedTime
+      pausedTimeRef.current = timerState.accumulatedTime
+
       if (timerState.isActive) {
         // Calculate elapsed time since the page was closed
         const now = Date.now()
         const elapsedSinceClose = Math.floor((now - timerState.timestamp) / 1000)
 
-        // Update accumulated time
-        accumulatedTimeRef.current = timerState.accumulatedTime + elapsedSinceClose
+        // Update accumulated time and display time
+        accumulatedTimeRef.current += elapsedSinceClose
+        pausedTimeRef.current = accumulatedTimeRef.current
         setTime(accumulatedTimeRef.current)
 
         // Auto-restart the timer
         startTimeRef.current = now
         setIsActive(true)
-      } else {
-        // Just restore the accumulated time
-        accumulatedTimeRef.current = timerState.accumulatedTime
       }
     }
 
@@ -89,7 +98,7 @@ export default function ActivityTracker() {
     try {
       // AudioContext is created lazily on user interaction to comply with autoplay policies
       audioContextRef.current = null
-    } catch {
+    } catch  {
       console.error("Web Audio API is not supported in this browser")
     }
 
@@ -115,7 +124,7 @@ export default function ActivityTracker() {
     const timerState = {
       isActive,
       timestamp: Date.now(),
-      accumulatedTime: accumulatedTimeRef.current,
+      accumulatedTime: isActive ? accumulatedTimeRef.current : pausedTimeRef.current,
     }
     localStorage.setItem("timerState", JSON.stringify(timerState))
   }
@@ -209,6 +218,7 @@ export default function ActivityTracker() {
           // Reset the refs
           startTimeRef.current = null
           accumulatedTimeRef.current = newTime
+          pausedTimeRef.current = newTime
         }
       } else {
         // If the tab is not active, still update the UI with an approximation
@@ -229,6 +239,9 @@ export default function ActivityTracker() {
       if (startTimeRef.current === null) {
         startTimeRef.current = Date.now()
         lastUpdateTimeRef.current = startTimeRef.current
+
+        // When starting from a paused state, set accumulated time to the paused time
+        accumulatedTimeRef.current = pausedTimeRef.current
       }
 
       startTimerInterval()
@@ -242,6 +255,7 @@ export default function ActivityTracker() {
         const now = Date.now()
         const elapsed = Math.floor((now - startTimeRef.current) / 1000)
         accumulatedTimeRef.current += elapsed
+        pausedTimeRef.current = accumulatedTimeRef.current
         startTimeRef.current = null
       }
     }
@@ -253,7 +267,6 @@ export default function ActivityTracker() {
     }
   }, [isActive, isClient])
 
-  
 
   const startTimer = () => {
     setIsActive(true)
@@ -261,7 +274,9 @@ export default function ActivityTracker() {
 
   const pauseTimer = () => {
     setIsActive(false)
-    saveSession(time)
+
+    // We don't save the session here anymore, as we want to continue from this point
+    // Instead, we'll save the session when the user resets the timer or when the target time is reached
   }
 
   const saveSession = (duration: number) => {
@@ -285,9 +300,15 @@ export default function ActivityTracker() {
   }
 
   const resetTimer = () => {
+    // Save the current session before resetting
+    if (time > 0) {
+      saveSession(time)
+    }
+
     setIsActive(false)
     setTime(0)
     accumulatedTimeRef.current = 0
+    pausedTimeRef.current = 0
     startTimeRef.current = null
   }
 
@@ -441,7 +462,7 @@ export default function ActivityTracker() {
                   {!isActive ? (
                     <Button onClick={startTimer} className="flex items-center gap-2">
                       <Play className="h-4 w-4" />
-                      Start
+                      {time > 0 ? "Continue" : "Start"}
                     </Button>
                   ) : (
                     <Button onClick={pauseTimer} variant="secondary" className="flex items-center gap-2">
@@ -478,7 +499,9 @@ export default function ActivityTracker() {
                   ? targetTime !== null
                     ? `Timer will stop after ${formatTime(targetTime)}.`
                     : "Timer is running. You'll be notified after each hour of activity."
-                  : "Press Start when you begin coding."}
+                  : time > 0
+                    ? "Timer is paused. Press Continue to resume."
+                    : "Press Start when you begin coding."}
               </p>
             </CardFooter>
           </Card>
