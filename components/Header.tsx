@@ -84,7 +84,7 @@ export default function Header() {
               <Link href="/dashboard">
                 <Button
                   variant="outline"
-                  className="mr-4 bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text "
+                  className="mr-4 bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text cursor-pointer "
                 >
                   Dashboard
                 </Button>
@@ -111,11 +111,12 @@ export default function Header() {
             size="icon"
             onClick={toggleDarkMode}
             aria-label="Toggle dark mode"
+            className="cursor-pointer"
           >
             {isDarkMode ? (
-              <Sun className="h-5 w-5" />
+              <Sun className="h-5 w-5  " />
             ) : (
-              <Moon className="h-5 w-5" />
+              <Moon className="h-5 w-5 " />
             )}
           </Button>
         </nav>

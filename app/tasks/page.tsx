@@ -133,7 +133,7 @@ export default function TasksPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 cursor-pointer "
               >
                 View Badges
                 {showBadgeNotification && (
@@ -144,12 +144,12 @@ export default function TasksPage() {
               </Button>
             </Link>
             <Link href="/dashboard">
-              <Button variant="outline" size="sm">
+              <Button className="cursor-pointer" variant="outline" size="sm">
                 Dashboard
               </Button>
             </Link>
             <Link href="/app">
-              <Button variant="outline" size="sm">
+              <Button className="cursor-pointer" variant="outline" size="sm">
                 Timer
               </Button>
             </Link>
@@ -226,7 +226,7 @@ export default function TasksPage() {
                   onChange={(e) => setNewTaskDescription(e.target.value)}
                 />
               </div>
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full cursor-pointer">
                 <Plus className="h-4 w-4 mr-2" /> Add Task
               </Button>
             </form>
