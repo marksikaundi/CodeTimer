@@ -14,9 +14,11 @@ export default function TimerInfoBanner() {
     setIsClient(true)
 
     // Check if we've already dismissed this banner
-    const dismissed = localStorage.getItem("timerInfoDismissed")
-    if (dismissed === "true") {
-      setIsVisible(false)
+    if (typeof window !== "undefined") {
+      const dismissed = localStorage.getItem("timerInfoDismissed")
+      if (dismissed === "true") {
+        setIsVisible(false)
+      }
     }
   }, [])
 
@@ -35,8 +37,9 @@ export default function TimerInfoBanner() {
         <Info className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
         <div className="flex-1">
           <p className="text-sm text-blue-800 dark:text-blue-200">
-            <strong>New feature:</strong> Your timer now keeps running even when you switch tabs or your device goes to
-            sleep. This ensures accurate tracking of your coding time, even when you&apos;re working in your code editor.
+            <strong>Enhanced timer:</strong> Your timer now continues running visibly even when you switch tabs or your
+            device goes to sleep. This ensures accurate tracking of your coding time, even when you&apos;re working in your
+            code editor.
           </p>
         </div>
         <Button

@@ -32,6 +32,7 @@ export default function ActivityTracker() {
   const startTimeRef = useRef<number | null>(null)
   const lastUpdateTimeRef = useRef<number>(0)
   const accumulatedTimeRef = useRef<number>(0)
+  const isTabActiveRef = useRef<boolean>(true)
 
   // Set isClient to true once the component is mounted
   useEffect(() => {
@@ -126,26 +127,30 @@ export default function ActivityTracker() {
     if (document.visibilityState === "hidden") {
       // Page is hidden, save the current state
       saveTimerState()
+      isTabActiveRef.current = false
 
-      // Clear the interval to save resources
-      if (timerRef.current) {
-        clearInterval(timerRef.current)
-        timerRef.current = null
-      }
-    } else if (document.visibilityState === "visible" && isActive) {
-      // Page is visible again and timer should be running
-      // Calculate time elapsed while hidden
-      const now = Date.now()
-      if (startTimeRef.current !== null) {
-        const elapsedSinceHidden = Math.floor((now - lastUpdateTimeRef.current) / 1000)
-        accumulatedTimeRef.current += elapsedSinceHidden
-        setTime(accumulatedTimeRef.current)
-      }
+      // We'll keep the timer running, but we'll update the time when the tab becomes visible again
+      // We don't clear the interval anymore to keep the UI updating
+    } else if (document.visibilityState === "visible") {
+      isTabActiveRef.current = true
 
-      // Restart the interval
-      startTimeRef.current = now
-      lastUpdateTimeRef.current = now
-      startTimerInterval()
+      // Page is visible again
+      if (isActive) {
+        // Calculate time elapsed while hidden
+        const now = Date.now()
+        if (startTimeRef.current !== null) {
+          // Only update the accumulated time if we were previously hidden
+          // This prevents double-counting when the tab becomes visible
+          if (!isTabActiveRef.current) {
+            const elapsedSinceHidden = Math.floor((now - lastUpdateTimeRef.current) / 1000)
+            accumulatedTimeRef.current += elapsedSinceHidden
+            setTime(accumulatedTimeRef.current)
+          }
+        }
+
+        // Update the reference time
+        lastUpdateTimeRef.current = now
+      }
     }
   }
 
@@ -170,37 +175,45 @@ export default function ActivityTracker() {
 
     timerRef.current = setInterval(() => {
       const now = Date.now()
-      const elapsed = Math.floor((now - startTimeRef.current!) / 1000)
-      const newTime = accumulatedTimeRef.current + elapsed
 
-      // Update the displayed time
-      setTime(newTime)
+      // If the tab is active, update normally
+      if (isTabActiveRef.current) {
+        const elapsed = Math.floor((now - startTimeRef.current!) / 1000)
+        const newTime = accumulatedTimeRef.current + elapsed
 
-      // Check for hourly notifications
-      if (soundEnabled && newTime > 0 && newTime % 3600 === 0) {
-        // Avoid duplicate notifications within 10 seconds
-        if (now - lastNotificationRef.current > 10000) {
+        // Update the displayed time
+        setTime(newTime)
+
+        // Check for hourly notifications
+        if (soundEnabled && newTime > 0 && newTime % 3600 === 0) {
+          // Avoid duplicate notifications within 10 seconds
+          if (now - lastNotificationRef.current > 10000) {
+            playNotificationSound()
+            lastNotificationRef.current = now
+          }
+        }
+
+        // Check if we've reached the target time
+        if (targetTime !== null && newTime >= targetTime) {
+          // Stop the timer and play notification
+          if (timerRef.current) {
+            clearInterval(timerRef.current)
+            timerRef.current = null
+          }
           playNotificationSound()
-          lastNotificationRef.current = now
+          setIsActive(false)
+
+          // Save the session
+          saveSession(newTime)
+
+          // Reset the refs
+          startTimeRef.current = null
+          accumulatedTimeRef.current = newTime
         }
-      }
-
-      // Check if we've reached the target time
-      if (targetTime !== null && newTime >= targetTime) {
-        // Stop the timer and play notification
-        if (timerRef.current) {
-          clearInterval(timerRef.current)
-          timerRef.current = null
-        }
-        playNotificationSound()
-        setIsActive(false)
-
-        // Save the session
-        saveSession(newTime)
-
-        // Reset the refs
-        startTimeRef.current = null
-        accumulatedTimeRef.current = newTime
+      } else {
+        // If the tab is not active, still update the UI with an approximation
+        // This keeps the timer visually running even when the tab is inactive
+        setTime((prevTime) => prevTime + 1)
       }
 
       lastUpdateTimeRef.current = now
