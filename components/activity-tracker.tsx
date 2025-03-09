@@ -74,19 +74,22 @@ export default function ActivityTracker() {
     if (savedTimerState) {
       const timerState = JSON.parse(savedTimerState)
 
-      // Set the accumulated time from saved state
-      accumulatedTimeRef.current = timerState.accumulatedTime
-      pausedTimeRef.current = timerState.accumulatedTime
+      // Always use the last saved time
+      const savedTime = timerState.lastTime || timerState.accumulatedTime
+      setTime(savedTime)
+      pausedTimeRef.current = savedTime
+      accumulatedTimeRef.current = savedTime
 
       if (timerState.isActive) {
         // Calculate elapsed time since the page was closed
         const now = Date.now()
         const elapsedSinceClose = Math.floor((now - timerState.timestamp) / 1000)
 
-        // Update accumulated time and display time
-        accumulatedTimeRef.current += elapsedSinceClose
-        pausedTimeRef.current = accumulatedTimeRef.current
-        setTime(accumulatedTimeRef.current)
+        // Update accumulated time and display time with the elapsed time
+        const updatedTime = savedTime + elapsedSinceClose
+        accumulatedTimeRef.current = updatedTime
+        pausedTimeRef.current = updatedTime
+        setTime(updatedTime)
 
         // Auto-restart the timer
         startTimeRef.current = now
@@ -98,7 +101,7 @@ export default function ActivityTracker() {
     try {
       // AudioContext is created lazily on user interaction to comply with autoplay policies
       audioContextRef.current = null
-    } catch  {
+    } catch {
       console.error("Web Audio API is not supported in this browser")
     }
 
@@ -124,7 +127,8 @@ export default function ActivityTracker() {
     const timerState = {
       isActive,
       timestamp: Date.now(),
-      accumulatedTime: isActive ? accumulatedTimeRef.current : pausedTimeRef.current,
+      accumulatedTime: time, // Use the current displayed time instead of refs
+      lastTime: time, // Add this to track the last known time
     }
     localStorage.setItem("timerState", JSON.stringify(timerState))
   }
@@ -267,6 +271,7 @@ export default function ActivityTracker() {
     }
   }, [isActive, isClient])
 
+  
 
   const startTimer = () => {
     setIsActive(true)
@@ -275,8 +280,12 @@ export default function ActivityTracker() {
   const pauseTimer = () => {
     setIsActive(false)
 
-    // We don't save the session here anymore, as we want to continue from this point
-    // Instead, we'll save the session when the user resets the timer or when the target time is reached
+    // Save the current state when pausing
+    pausedTimeRef.current = time
+    accumulatedTimeRef.current = time
+
+    // Save the timer state to localStorage
+    saveTimerState()
   }
 
   const saveSession = (duration: number) => {
@@ -391,6 +400,16 @@ export default function ActivityTracker() {
     const progress = (time / targetTime) * 100
     return Math.min(progress, 100)
   }
+
+  // Save timer state whenever time changes
+  useEffect(() => {
+    if (!isClient) return
+
+    // Only save if we have a non-zero time
+    if (time > 0) {
+      saveTimerState()
+    }
+  }, [time, isActive, isClient])
 
   return (
     <div className={`max-w-4xl mx-auto`}>
