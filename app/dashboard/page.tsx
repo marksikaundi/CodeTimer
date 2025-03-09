@@ -95,7 +95,7 @@ export default function DashboardPage() {
               asChild
               size="sm"
             >
-              <Link href="/view-badge">
+              <Link href="/view-badges">
                 <User className="h-4 w-4" />
                 View Badge
               </Link>
