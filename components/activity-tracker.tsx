@@ -26,6 +26,11 @@ export default function ActivityTracker() {
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const lastNotificationRef = useRef<number>(0)
 
+  // New refs for timestamp-based timing
+  const startTimeRef = useRef<number | null>(null)
+  const lastUpdateTimeRef = useRef<number>(0)
+  const accumulatedTimeRef = useRef<number>(0)
+
   // Load saved data from localStorage
   useEffect(() => {
     const savedTime = localStorage.getItem("codingTime")
@@ -33,6 +38,9 @@ export default function ActivityTracker() {
     const savedSoundEnabled = localStorage.getItem("soundEnabled")
     const savedDarkMode = localStorage.getItem("darkMode")
     const savedTargetTime = localStorage.getItem("targetTime")
+
+    // Check if there's a saved timer state
+    const savedTimerState = localStorage.getItem("timerState")
 
     if (savedTime) setTime(Number.parseInt(savedTime))
     if (savedSessions) setSessions(JSON.parse(savedSessions))
@@ -46,6 +54,27 @@ export default function ActivityTracker() {
       }
     }
 
+    // Restore timer state if it was running when the page was closed
+    if (savedTimerState) {
+      const timerState = JSON.parse(savedTimerState)
+      if (timerState.isActive) {
+        // Calculate elapsed time since the page was closed
+        const now = Date.now()
+        const elapsedSinceClose = Math.floor((now - timerState.timestamp) / 1000)
+
+        // Update accumulated time
+        accumulatedTimeRef.current = timerState.accumulatedTime + elapsedSinceClose
+        setTime(accumulatedTimeRef.current)
+
+        // Auto-restart the timer
+        startTimeRef.current = now
+        setIsActive(true)
+      } else {
+        // Just restore the accumulated time
+        accumulatedTimeRef.current = timerState.accumulatedTime
+      }
+    }
+
     // Initialize Web Audio API
     if (typeof window !== "undefined") {
       try {
@@ -55,7 +84,59 @@ export default function ActivityTracker() {
         console.error("Web Audio API is not supported in this browser")
       }
     }
+
+    // Register beforeunload event to save timer state
+    window.addEventListener("beforeunload", saveTimerState)
+
+    // Register visibility change event
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+
+    return () => {
+      window.removeEventListener("beforeunload", saveTimerState)
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+      }
+    }
   }, [])
+
+  // Save timer state when page is closed or hidden
+  const saveTimerState = () => {
+    const timerState = {
+      isActive,
+      timestamp: Date.now(),
+      accumulatedTime: accumulatedTimeRef.current,
+    }
+    localStorage.setItem("timerState", JSON.stringify(timerState))
+  }
+
+  // Handle visibility change (tab switching)
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === "hidden") {
+      // Page is hidden, save the current state
+      saveTimerState()
+
+      // Clear the interval to save resources
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+        timerRef.current = null
+      }
+    } else if (document.visibilityState === "visible" && isActive) {
+      // Page is visible again and timer should be running
+      // Calculate time elapsed while hidden
+      const now = Date.now()
+      if (startTimeRef.current !== null) {
+        const elapsedSinceHidden = Math.floor((now - lastUpdateTimeRef.current) / 1000)
+        accumulatedTimeRef.current += elapsedSinceHidden
+        setTime(accumulatedTimeRef.current)
+      }
+
+      // Restart the interval
+      startTimeRef.current = now
+      lastUpdateTimeRef.current = now
+      startTimerInterval()
+    }
+  }
 
   // Save data to localStorage when it changes
   useEffect(() => {
@@ -66,41 +147,73 @@ export default function ActivityTracker() {
     localStorage.setItem("targetTime", targetTime?.toString() || "null")
   }, [time, sessions, soundEnabled, isDarkMode, targetTime])
 
+  // Start the timer interval
+  const startTimerInterval = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+    }
+
+    timerRef.current = setInterval(() => {
+      const now = Date.now()
+      const elapsed = Math.floor((now - startTimeRef.current!) / 1000)
+      const newTime = accumulatedTimeRef.current + elapsed
+
+      // Update the displayed time
+      setTime(newTime)
+
+      // Check for hourly notifications
+      if (soundEnabled && newTime > 0 && newTime % 3600 === 0) {
+        // Avoid duplicate notifications within 10 seconds
+        if (now - lastNotificationRef.current > 10000) {
+          playNotificationSound()
+          lastNotificationRef.current = now
+        }
+      }
+
+      // Check if we've reached the target time
+      if (targetTime !== null && newTime >= targetTime) {
+        // Stop the timer and play notification
+        if (timerRef.current) {
+          clearInterval(timerRef.current)
+          timerRef.current = null
+        }
+        playNotificationSound()
+        setIsActive(false)
+
+        // Save the session
+        saveSession(newTime)
+
+        // Reset the refs
+        startTimeRef.current = null
+        accumulatedTimeRef.current = newTime
+      }
+
+      lastUpdateTimeRef.current = now
+    }, 1000)
+  }
+
   // Timer logic
   useEffect(() => {
     if (isActive) {
-      timerRef.current = setInterval(() => {
-        setTime((prevTime) => {
-          const newTime = prevTime + 1
+      // If starting the timer
+      if (startTimeRef.current === null) {
+        startTimeRef.current = Date.now()
+        lastUpdateTimeRef.current = startTimeRef.current
+      }
 
-          // Check if we need to play a notification sound (every 60 minutes)
-          if (soundEnabled && newTime > 0 && newTime % 3600 === 0) {
-            // Avoid duplicate notifications within 10 seconds
-            const now = Date.now()
-            if (now - lastNotificationRef.current > 10000) {
-              playNotificationSound()
-              lastNotificationRef.current = now
-            }
-          }
-
-          // Check if we've reached the target time
-          if (targetTime !== null && newTime >= targetTime) {
-            // Stop the timer and play notification
-            if (timerRef.current) {
-              clearInterval(timerRef.current)
-            }
-            playNotificationSound()
-            setIsActive(false)
-
-            // Save the session
-            saveSession(newTime)
-          }
-
-          return newTime
-        })
-      }, 1000)
+      startTimerInterval()
     } else if (timerRef.current) {
+      // If stopping the timer
       clearInterval(timerRef.current)
+      timerRef.current = null
+
+      // Update accumulated time
+      if (startTimeRef.current !== null) {
+        const now = Date.now()
+        const elapsed = Math.floor((now - startTimeRef.current) / 1000)
+        accumulatedTimeRef.current += elapsed
+        startTimeRef.current = null
+      }
     }
 
     return () => {
@@ -108,7 +221,7 @@ export default function ActivityTracker() {
         clearInterval(timerRef.current)
       }
     }
-  }, [isActive, soundEnabled, targetTime])
+  }, [isActive])
 
 
   const startTimer = () => {
@@ -141,6 +254,8 @@ export default function ActivityTracker() {
   const resetTimer = () => {
     setIsActive(false)
     setTime(0)
+    accumulatedTimeRef.current = 0
+    startTimeRef.current = null
   }
 
   const playNotificationSound = () => {
@@ -149,7 +264,8 @@ export default function ActivityTracker() {
     try {
       // Create AudioContext on demand (needed for browser autoplay policies)
       if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
       }
 
       const context = audioContextRef.current
