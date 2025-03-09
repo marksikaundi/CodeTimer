@@ -1,24 +1,30 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Info, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
 export default function TimerInfoBanner() {
   const [isVisible, setIsVisible] = useState(true)
+  const [isClient, setIsClient] = useState(false)
 
-  // Check if we've already dismissed this banner
-  useState(() => {
+  // Set isClient to true once the component is mounted
+  useEffect(() => {
+    setIsClient(true)
+
+    // Check if we've already dismissed this banner
     const dismissed = localStorage.getItem("timerInfoDismissed")
     if (dismissed === "true") {
       setIsVisible(false)
     }
-  })
+  }, [])
 
   const handleDismiss = () => {
     setIsVisible(false)
-    localStorage.setItem("timerInfoDismissed", "true")
+    if (isClient) {
+      localStorage.setItem("timerInfoDismissed", "true")
+    }
   }
 
   if (!isVisible) return null

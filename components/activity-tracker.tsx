@@ -22,6 +22,8 @@ export default function ActivityTracker() {
   const [soundEnabled, setSoundEnabled] = useState(true)
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [sessions, setSessions] = useState<{ date: string; duration: number }[]>([])
+  const [isClient, setIsClient] = useState(false)
+
   const audioContextRef = useRef<AudioContext | null>(null)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const lastNotificationRef = useRef<number>(0)
@@ -31,8 +33,15 @@ export default function ActivityTracker() {
   const lastUpdateTimeRef = useRef<number>(0)
   const accumulatedTimeRef = useRef<number>(0)
 
-  // Load saved data from localStorage
+  // Set isClient to true once the component is mounted
   useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Load saved data from localStorage - only run on client
+  useEffect(() => {
+    if (!isClient) return
+
     const savedTime = localStorage.getItem("codingTime")
     const savedSessions = localStorage.getItem("codingSessions")
     const savedSoundEnabled = localStorage.getItem("soundEnabled")
@@ -76,13 +85,11 @@ export default function ActivityTracker() {
     }
 
     // Initialize Web Audio API
-    if (typeof window !== "undefined") {
-      try {
-        // AudioContext is created lazily on user interaction to comply with autoplay policies
-        audioContextRef.current = null
-      } catch {
-        console.error("Web Audio API is not supported in this browser")
-      }
+    try {
+      // AudioContext is created lazily on user interaction to comply with autoplay policies
+      audioContextRef.current = null
+    } catch {
+      console.error("Web Audio API is not supported in this browser")
     }
 
     // Register beforeunload event to save timer state
@@ -98,10 +105,12 @@ export default function ActivityTracker() {
         clearInterval(timerRef.current)
       }
     }
-  }, [])
+  }, [isClient]) // Only run when isClient changes to true
 
   // Save timer state when page is closed or hidden
   const saveTimerState = () => {
+    if (!isClient) return
+
     const timerState = {
       isActive,
       timestamp: Date.now(),
@@ -112,6 +121,8 @@ export default function ActivityTracker() {
 
   // Handle visibility change (tab switching)
   const handleVisibilityChange = () => {
+    if (!isClient) return
+
     if (document.visibilityState === "hidden") {
       // Page is hidden, save the current state
       saveTimerState()
@@ -140,15 +151,19 @@ export default function ActivityTracker() {
 
   // Save data to localStorage when it changes
   useEffect(() => {
+    if (!isClient) return
+
     localStorage.setItem("codingTime", time.toString())
     localStorage.setItem("codingSessions", JSON.stringify(sessions))
     localStorage.setItem("soundEnabled", soundEnabled.toString())
     localStorage.setItem("darkMode", isDarkMode.toString())
     localStorage.setItem("targetTime", targetTime?.toString() || "null")
-  }, [time, sessions, soundEnabled, isDarkMode, targetTime])
+  }, [time, sessions, soundEnabled, isDarkMode, targetTime, isClient])
 
   // Start the timer interval
   const startTimerInterval = () => {
+    if (!isClient) return
+
     if (timerRef.current) {
       clearInterval(timerRef.current)
     }
@@ -194,6 +209,8 @@ export default function ActivityTracker() {
 
   // Timer logic
   useEffect(() => {
+    if (!isClient) return
+
     if (isActive) {
       // If starting the timer
       if (startTimeRef.current === null) {
@@ -221,8 +238,9 @@ export default function ActivityTracker() {
         clearInterval(timerRef.current)
       }
     }
-  }, [isActive])
+  }, [isActive, isClient])
 
+  
 
   const startTimer = () => {
     setIsActive(true)
@@ -234,6 +252,8 @@ export default function ActivityTracker() {
   }
 
   const saveSession = (duration: number) => {
+    if (!isClient) return
+
     // If we've tracked some time, save this session
     if (duration > 0) {
       const today = new Date().toISOString().split("T")[0]
@@ -259,7 +279,7 @@ export default function ActivityTracker() {
   }
 
   const playNotificationSound = () => {
-    if (!soundEnabled) return
+    if (!isClient || !soundEnabled) return
 
     try {
       // Create AudioContext on demand (needed for browser autoplay policies)
